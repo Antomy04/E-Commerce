@@ -7,6 +7,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    
+    base: './',   // ✅ THIS LINE FIXES YOUR ISSUE
+
     server: {
       port: 5173,
       proxy: {
