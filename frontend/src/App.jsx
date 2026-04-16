@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { createBrowserRouter, createRoutesFromElements, Route, Outlet } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCart } from './features/cart/cartSlice';
 import { fetchWishlist } from './features/wishlist/wishlistSlice';
@@ -28,7 +28,7 @@ import AdminProducts from './pages/admin/AdminProducts';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminProductForm from './pages/admin/AdminProductForm';
 
-const App = () => {
+const Layout = () => {
   const dispatch = useDispatch();
   const { userInfo } = useSelector((s) => s.auth);
 
@@ -41,48 +41,58 @@ const App = () => {
   }, [userInfo]);
 
   return (
-    <Router>
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Navbar />
-        <main style={{ flex: 1 }}>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/products/:id" element={<ProductDetail />} />
-            <Route path="/cart" element={<Cart />} />
-
-            {/* Protected Routes */}
-            <Route path="/checkout" element={<PrivateRoute><Checkout /></PrivateRoute>} />
-            <Route path="/orders" element={<PrivateRoute><OrderHistory /></PrivateRoute>} />
-            <Route path="/orders/:id" element={<PrivateRoute><OrderDetail /></PrivateRoute>} />
-            <Route path="/wishlist" element={<PrivateRoute><Wishlist /></PrivateRoute>} />
-            <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-
-            {/* Admin Routes */}
-            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-            <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
-            <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
-            <Route path="/admin/products/new" element={<AdminRoute><AdminProductForm /></AdminRoute>} />
-            <Route path="/admin/products/:id/edit" element={<AdminRoute><AdminProductForm /></AdminRoute>} />
-
-            {/* 404 */}
-            <Route path="*" element={
-              <div className="empty-state" style={{ minHeight: '60vh' }}>
-                <div style={{ fontSize: '5rem' }}>🔍</div>
-                <h1 style={{ fontSize: '3rem', fontWeight: 900, margin: '1rem 0 0.5rem' }}>404</h1>
-                <div className="empty-state-title">Page Not Found</div>
-                <p>The page you're looking for doesn't exist.</p>
-                <a href="/" className="btn btn-primary" style={{ marginTop: '1.5rem', display: 'inline-flex' }}>🏠 Go Home</a>
-              </div>
-            } />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
-    </Router>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <Navbar />
+      <main style={{ flex: 1 }}>
+        <Outlet />
+      </main>
+      <Footer />
+    </div>
   );
 };
 
-export default App;
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route path="/" element={<Layout />}>
+      {/* Public Routes */}
+      <Route index element={<Home />} />
+      <Route path="login" element={<Login />} />
+      <Route path="register" element={<Register />} />
+      <Route path="products/:id" element={<ProductDetail />} />
+      <Route path="cart" element={<Cart />} />
+
+      {/* Protected Routes */}
+      <Route path="checkout" element={<PrivateRoute><Checkout /></PrivateRoute>} />
+      <Route path="orders" element={<PrivateRoute><OrderHistory /></PrivateRoute>} />
+      <Route path="orders/:id" element={<PrivateRoute><OrderDetail /></PrivateRoute>} />
+      <Route path="wishlist" element={<PrivateRoute><Wishlist /></PrivateRoute>} />
+      <Route path="profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+
+      {/* Admin Routes */}
+      <Route path="admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+      <Route path="admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
+      <Route path="admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
+      <Route path="admin/products/new" element={<AdminRoute><AdminProductForm /></AdminRoute>} />
+      <Route path="admin/products/:id/edit" element={<AdminRoute><AdminProductForm /></AdminRoute>} />
+
+      {/* 404 */}
+      <Route path="*" element={
+        <div className="empty-state" style={{ minHeight: '60vh' }}>
+          <div style={{ fontSize: '5rem' }}>🔍</div>
+          <h1 style={{ fontSize: '3rem', fontWeight: 900, margin: '1rem 0 0.5rem' }}>404</h1>
+          <div className="empty-state-title">Page Not Found</div>
+          <p>The page you're looking for doesn't exist.</p>
+          <a href="/" className="btn btn-primary" style={{ marginTop: '1.5rem', display: 'inline-flex' }}>🏠 Go Home</a>
+        </div>
+      } />
+    </Route>
+  ),
+  {
+    future: {
+      v7_startTransition: true,
+      v7_relativeSplatPath: true,
+    },
+  }
+);
+
+export default router;
