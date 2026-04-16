@@ -1,7 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-// const path = require('path');
+const path = require('path');
+
 const connectDB = require('./backend/config/db');
 const { notFound, errorHandler } = require('./backend/middleware/errorMiddleware');
 
@@ -19,23 +20,24 @@ const adminRoutes = require('./backend/routes/adminRoutes');
 
 const app = express();
 
-// Connect to Database
+// Connect DB
 connectDB();
 
-// Middleware — allow multiple frontend origins (dev + production)
+// CORS
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
   .split(',')
   .map((o) => o.trim());
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (Postman, curl, server-to-server)
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) return callback(null, true);
     callback(new Error(`CORS blocked for origin: ${origin}`));
   },
   credentials: true,
 }));
+
+// Body parsers
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -44,11 +46,11 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// Legacy auth compatibility for static HTML pages
+// Legacy routes
 app.post('/signup', registerUser);
 app.post('/signin', loginUser);
 
-// Mount routes
+// API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
@@ -59,15 +61,16 @@ app.use('/api/coupons', couponRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 
-const path = require('path');
-
+// ✅ PRODUCTION: Serve frontend
 if (process.env.NODE_ENV === 'production') {
   const frontendPath = path.resolve(__dirname, 'frontend', 'dist');
 
+  // Serve static files
   app.use(express.static(frontendPath));
 
-  // ONLY handle non-API routes
-  app.get(/^\/(?!api).*/, (req, res) => {
+  // Catch-all (ONLY for non-API routes)
+  app.get('*', (req, res) => {
+    if (req.originalUrl.startsWith('/api')) return res.status(404).end();
     res.sendFile(path.join(frontendPath, 'index.html'));
   });
 }
@@ -76,9 +79,8 @@ if (process.env.NODE_ENV === 'production') {
 app.use(notFound);
 app.use(errorHandler);
 
+// Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`\n🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-  console.log(`📡 API: http://localhost:${PORT}/api/health\n`);
+  console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
 });
-
