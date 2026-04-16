@@ -59,12 +59,15 @@ app.use('/api/coupons', couponRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 
-if (process.env.NODE_ENV === 'production') {
-  const frontendDistPath = path.join(__dirname, 'frontend', 'dist');
+const path = require('path');
 
-  app.use(express.static(frontendDistPath));
-  app.get(/^(?!\/api).*/, (req, res) => {
-    res.sendFile(path.join(frontendDistPath, 'index.html'));
+if (process.env.NODE_ENV === 'production') {
+  const frontendPath = path.resolve(__dirname, 'frontend', 'dist');
+
+  app.use(express.static(frontendPath));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(frontendPath, 'index.html'));
   });
 }
 
