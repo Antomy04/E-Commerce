@@ -63,7 +63,7 @@ app.use('/api/admin', adminRoutes);
 
 // ✅ PRODUCTION: Serve frontend
 if (process.env.NODE_ENV === 'production') {
-  const frontendPath = path.resolve(__dirname, 'frontend', 'dist');
+  const frontendPath = path.resolve(__dirname, 'dist');
 
   // Serve static files
   app.use(express.static(frontendPath));
