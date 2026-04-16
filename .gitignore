@@ -9,7 +9,6 @@ frontend/.env.local
 frontend/.env.production
 
 # Build output
-frontend/dist/
 
 # Logs
 *.log
